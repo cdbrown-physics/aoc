@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """Base python file that is nothing fancy."""
-
+import cython
 import logging
 import argparse
 import sys
 
-def make_lists(file_path):
+def make_lists(file_path:cython.basestring):
     list_one = []
     list_two = []
     with open(file_path, 'r') as file:
         for line in file:
             new_line = line.strip('\n')
+            while '  ' in new_line:
+                new_line = new_line.replace('  ', ' ')
             left, right = new_line.split()
             logging.debug(f"{left}, {right}")
             list_one.append(int(left))
