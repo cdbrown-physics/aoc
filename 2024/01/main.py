@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""Base python file that is nothing fancy."""
 
 import logging
 import argparse
@@ -41,8 +42,7 @@ def PartTwo(args):
         similar += sim * n
     print(f"Answer for part two: {similar}")
     
-
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-d", "--debug", help="Debug level", default=20, type=int)
     parser.add_argument("-p", "--path", help="Path to the input file we want to use", type=str)
@@ -50,3 +50,6 @@ if __name__ == "__main__":
     logging.basicConfig(level=args.debug)
     PartOne(args)
     PartTwo(args)
+    
+if __name__ == "__main__":
+    main()
