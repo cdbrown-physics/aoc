@@ -1,7 +1,8 @@
-#!/usr/bin/env python3
+
 """Scanning for XMAS in data"""
 import logging
 import argparse
+from datetime import datetime as dt
 
 from typing import List, Tuple
 
@@ -120,7 +121,9 @@ def main():
     args = parser.parse_args()
     logging.basicConfig(level=args.debug)
     PartOne(args.path)
-    PartTwo(args.path)
+    # PartTwo(args.path)
     
 if __name__ == "__main__":
+    start = dt.now()
     main()
+    print("Time", dt.now() - start)
