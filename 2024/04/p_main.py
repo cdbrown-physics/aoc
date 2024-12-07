@@ -100,6 +100,7 @@ def PartOne(file_path: str):
         logging.debug(x_indexs)
     directions = ['right','left','up','down','diag_up_right',"diag_up_left","diag_down_right","diag_down_left"]
     tasks = [(x_index, direction) for x_index in x_indexs for direction in directions]
+    print(tasks)
     with Pool(cpu_count()) as pool:
         results = pool.map(process_taks, tasks)
     answer = results.count(True)
