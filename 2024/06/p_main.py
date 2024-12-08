@@ -137,6 +137,7 @@ def part_two_main(args):
     return stuck_count
 
 def PartTwo(guard: Guard):
+    """Taking my solution for day 06 and trying to make it faster with multiprocessing"""
     answer = 0
     path_walked: Dict[int, List[int]] = {}
     # Get all the steps taken on the normal rout 
