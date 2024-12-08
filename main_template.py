@@ -3,6 +3,8 @@
 import logging
 import argparse
 
+from typing import List, Dict
+
 def PartOne(file_path: str):
     pass
     
