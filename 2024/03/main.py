@@ -2,10 +2,7 @@
 
 import logging
 import argparse
-import sys
 import re
-
-from typing import List
 
 def PartOne(file_path: str):
     answer = 0
@@ -22,7 +19,6 @@ def PartOne(file_path: str):
         answer += int(match[0]) * int(match[1])
         logging.debug(answer)
     print(f"Answer to part one: {answer}")
-
 
 def PartTwo(file_path: str):
     answer = 0
@@ -52,7 +48,6 @@ def PartTwo(file_path: str):
             answer += int(match[mul_a]) * int(match[mul_b])
         else:
             continue
-
         logging.debug(answer)
     print(f"Answer to part two: {answer}")
     

@@ -20,8 +20,20 @@ def sort_element(the_list: List[str]) -> Tuple[List[str], bool]:
             the_list[data_to_move] = -1
     return the_list, keep_sorting
 
-def sort_two(the_list: List[str]) -> Tuple[List[str], bool]:
-    """Rather than getting one character of free space, need to look for a whole section"""
+def sort_two(the_list: List[str], free_dict: Dict[int, int], last_index: int) -> Tuple[List[str], bool]:
+    """Rather than getting one character of free space, need to look for a whole section. Look for the lowest key, and 
+    see if it fits the file I want to move. """
+    last_element = the_list[last_index]
+    if int(last_element) == -1:
+         last_index -= 1
+         return the_list, free_dict, True, last_index
+    matching_elemetns = []
+
+    for e in reversed(the_list[:last_index]):
+        if e == last_element:
+            matching_elemetns.append(last_element)
+
+
     
 
 def get_checksum(the_list: List[str]) -> int:
@@ -82,9 +94,11 @@ def PartTwo(file_path: str):
     logging.debug(the_list)
     logging.debug(free_dict)
     keep_sorting = True
+    last_index: int = -1
     start = dt.now()
     while keep_sorting:
-        the_list, keep_sorting = sort_two(file_dict, free_dict)
+        import pdb; pdb.set_trace()
+        the_list, free_dict, last_index, keep_sorting = sort_two(file_dict, free_dict, last_index)
     logging.debug(the_list)
     print("While loop took: ", dt.now() - start)
     # Now get 
@@ -99,7 +113,7 @@ def main():
     parser.add_argument("-p", "--path", help="Path to the input file we want to use", type=str)
     args = parser.parse_args()
     logging.basicConfig(level=args.debug)
-    # PartOne(args.path)
+    PartOne(args.path)
     PartTwo(args.path)
     
 if __name__ == "__main__":
