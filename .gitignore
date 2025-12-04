@@ -7,3 +7,6 @@ build/
 #Rust things
 target/
 Cargo.lock
+
+# aoc things
+*data.txt
