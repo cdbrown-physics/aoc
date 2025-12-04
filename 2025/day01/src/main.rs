@@ -137,11 +137,10 @@ fn main() -> Result<()>
     env_logger::init();
     info!("Starting program");
     let lines = read_lines("data.txt").expect("Failed to read file.");
-    // debug!("{:?}", lines);
-    // let part_one_answer = part_one(&lines)?;
-    // println!("Answer to part one: {part_one_answer}");
+    debug!("{:?}", lines);
+    let part_one_answer = part_one(&lines)?;
+    println!("Answer to part one: {part_one_answer}");
     let part_two_answer = part_two(&lines)?;
     println!("Answer to part two: {part_two_answer}");
     Ok(())
-    
 }
