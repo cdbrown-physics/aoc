@@ -4,7 +4,7 @@ use std::io;
 use anyhow::{Context, Result};
 use log::{debug, info};
 use env_logger;
-use regex::Regex;
+
 
 fn read_lines(filename: &str) -> Result<Vec<String>>
 {
@@ -15,35 +15,58 @@ fn read_lines(filename: &str) -> Result<Vec<String>>
     Ok(ranges)
 }
 
-fn split_entry(entry: &String) -> Result<(u32, u32)>{
+fn split_entry(entry: &String) -> Result<(u64, u64)>{
     let range_values: Vec<String> = entry.split('-').map(|s| s.trim().to_string()).collect();
-    let start_range: u32 = range_values[0].parse::<u32>()?;
-    let end_range: u32 = range_values[1].parse::<u32>()?;
+    let start_range: u64 = range_values[0].parse::<u64>()?;
+    let end_range: u64 = range_values[1].parse::<u64>()?;
 
     Ok((start_range, end_range))
 }
-fn check_repeet(num: u32) -> Result<bool>{
+fn id_repeet(num: u64) -> bool{
+    let str_number: String = num.to_string();
+    let mid_val = str_number.len() / 2;
+    let first_half = &str_number[..mid_val];
+    let second_half = &str_number[mid_val..];
+    if first_half == second_half
+    {
+        return true
+    }
+    else
+    {
+        // println!("{first_half} ands {second_half} don't match");
+        return false
+    }
     
 }
-fn find_invalid_ids(start_range: u32, end_range: u32) -> Result<Vec<u32>> {
+fn find_invalid_ids(start_range: u64, end_range: u64) -> Result<Vec<u64>> {
 
-    let invalid_ids: Vec<u32> = Vec::new();
+    // println!("Checking range of {start_range} to {end_range}");
+    let mut invalid_ids: Vec<u64> = Vec::new();
     for i in start_range..=end_range
     {
-        check_repeet(i);
+        // println!("Checking {i}");
+        if id_repeet(i)
+        {
+            // println!("Id: {i} is a repeet.");
+            invalid_ids.push(i);
+        }
     }
     Ok(invalid_ids)
 }
 
-fn part_one(data: &Vec<String>) -> Result<i32>
+fn part_one(data: &Vec<String>) -> Result<u64>
 {
+    let mut answer: u64 = 0;
     for entry in data
     {
         // Again, need to split this range data, this time by the `-`
         let (start_range, end_range) = split_entry(entry)?;
         let invalid_ids = find_invalid_ids(start_range, end_range)?;
+        // println!{"Found the invalids {:?}", invalid_ids};
+        let s: u64 = invalid_ids.iter().sum();
+        answer += s;
     }
-    Ok(0)
+    Ok(answer)
 }
 
 fn part_two(data: &Vec<String>) -> Result<i32>
