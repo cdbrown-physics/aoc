@@ -53,6 +53,21 @@ fn get_ones_num_index(line: &String, tens_index: usize) -> Result<usize> {
     Ok(max_ones_index)
 }
 
+fn get_any_num_index(line: &String, index_offset: usize, last_index: usize) -> Result<usize> {
+    let mut max_int: u32 = 0;
+    let mut max_index: usize = 0;
+    // Want to return the index of the value that corresponds to the character of the string.
+    for i in last_index..(line.len()-index_offset) {
+        let c = line.as_bytes()[i] as char;
+        let possible_num = c.to_digit(10).context("Failed to convert to digit")?;
+        if possible_num > max_int { 
+            max_int = possible_num;
+            max_index = i;
+        }
+    }
+    Ok(max_index)
+}
+
 fn find_joltage(line: &String) -> Result<String> {
     let tens_num_index: usize = get_tens_num_index(&line).context("Failed to find tens place number")?;
     let ones_num_index: usize = get_ones_num_index(&line, tens_num_index).context("Failed to find tens place number")?;
@@ -60,6 +75,25 @@ fn find_joltage(line: &String) -> Result<String> {
     let tens_char: char = line.as_bytes()[tens_num_index] as char;
     let ones_char = line.as_bytes()[ones_num_index] as char;
     let joltage = format!("{tens_char}{ones_char}");
+    debug!("Number used is {joltage}");
+    Ok(joltage)
+}
+
+fn find_large_joltage(line: &String, joltage_diggits: usize) -> Result<String> {
+    let mut last_index: usize = 0;
+    let mut jolt_vec: Vec<usize> = Vec::new();
+    for i in (0..joltage_diggits).rev() {
+        let joltage_index = get_any_num_index(&line, i, last_index)?;
+        jolt_vec.push(joltage_index);
+        last_index = joltage_index + 1;
+    }
+    debug!("Indexes found {:?}", jolt_vec);
+    // Now I just need to build the jolt number from the indexes in jolt_vec
+    let mut joltage: String = String::new();
+    for i in jolt_vec {
+        let c: char = line.as_bytes()[i] as char;
+        joltage = format!{"{joltage}{c}"};
+    }
     debug!("Number used is {joltage}");
     Ok(joltage)
 }
@@ -76,9 +110,17 @@ fn part_one(lines: &Vec<String>) -> Result<u32>
     Ok(total_joltage)
 }
 
-fn part_two(lines: &Vec<String>) -> Result<i32>
+fn part_two(lines: &Vec<String>) -> Result<u64>
 {
-    Ok(0)
+    let mut total_joltage = 0;
+    for line in lines {
+        debug!("Looking at line: {line}");
+        let joltage = find_large_joltage(&line, 12)?;
+        let num_joltage: u64 = joltage.parse::<u64>()?;
+        total_joltage += num_joltage;
+        }
+
+    Ok(total_joltage)
 }
 
 fn main() -> Result<()>
