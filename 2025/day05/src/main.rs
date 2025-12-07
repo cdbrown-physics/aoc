@@ -4,7 +4,7 @@ use std::io::{BufRead, BufReader};
 
 use anyhow::{Context, Result};
 use clap::Parser;
-use log::{debug, info};
+use log::{debug, info, warn};
 
 #[derive(Parser)]
 struct Args{
@@ -55,9 +55,68 @@ fn part_one(range_ids: &[(u64, u64)], food_ids: &[u64]) -> u32
 }
 
 fn part_two(range_ids: &mut Vec<(u64, u64)>) -> u64 {
+    /*Game plan: Sort the list of id ranges, then just look at the last set. If the next one overlaps, just add the 
+    remainder. If no overlap, then just add that whole range */
     range_ids.sort_by_key(|(a, _)| *a);
     debug!("Sorted acceptable ids {range_ids:?}");
-    0
+    let mut total_ids: u64 = 0;
+    let mut last_id_range: (u64, u64) = (0, 0);
+    for &(start, end) in range_ids.iter() {
+        debug!("Looking at range {start} - {end}");
+        if start > last_id_range.1 && end >= start {
+            // whole new range to look at
+            debug!("Whole new range to add");
+            total_ids += end - start + 1; // supid off by 1
+            debug!("New range adding {}", end-start+1);
+            last_id_range = (start, end)
+        }
+        else if start == last_id_range.0 && end < last_id_range.1 {
+            debug!("Subset of last range. Nothing to add");
+            continue;
+        }
+        else if start > last_id_range.0 && end < last_id_range.1 {
+            debug!("Subset of last range. Nothing to add");
+            continue;
+        }
+        else if start == last_id_range.0 && start == last_id_range.1 && end > last_id_range.1 {
+            debug!("Adding range, -1 because start overlaps with last range");
+            total_ids += end - start;
+            last_id_range = (start, end);
+        }
+        else if start == last_id_range.1 && end == last_id_range.1{
+            continue;
+        }
+        else if start > last_id_range.0 && end == last_id_range.1 {
+            continue
+        }
+        else if start < last_id_range.1 && end > last_id_range.1 {
+            // Minor overlap just add extra 
+            total_ids += end - last_id_range.1;
+            debug!("Minor overlap adding {}", end-last_id_range.1);
+            last_id_range = (start, end);
+        }
+        else if start == last_id_range.1 && end > last_id_range.1 {
+            debug!("Last number overlap adding new range with out the extra 1");
+            total_ids += end - start; 
+            debug!("New range adding {}", end-start+1);
+            last_id_range = (start, end)
+        }
+        else if start == last_id_range.0 && end > last_id_range.1 {
+            total_ids += end - last_id_range.1;
+            debug!("Minor overlap adding {}", end-last_id_range.1);
+            last_id_range = (start, end);
+        }
+        else if start == last_id_range.0 && end == last_id_range.1 {
+            debug!("Total overlap.");
+            continue;
+        }
+        else {
+            warn!("Other odd case, look here to see how to handel it!");
+            debug!("Current start end: {start} - {end}");
+            debug!("Last range: {last_id_range:?}");
+        }
+    }
+    total_ids
 }
 
 fn main() -> Result<()>
