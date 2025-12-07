@@ -1,12 +1,10 @@
-use std::{fs, path::{Path, PathBuf}};
+use std::{path::{Path, PathBuf}};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
 use anyhow::{Context, Result};
 use clap::Parser;
 use log::{debug, info};
-use env_logger;
-use regex::Regex;
 
 #[derive(Parser)]
 struct Args{
@@ -14,39 +12,52 @@ struct Args{
     path: PathBuf,
 }
 
-fn read_lines(filename: &Path)-> Result<(Vec<String>, Vec<u32>)> {
+fn read_lines(filename: &Path)-> Result<(Vec<(u64, u64)>, Vec<u64>)> {
     let file = File::open(filename).context("Failed to open the file")?;
-
     let reader = BufReader::new(file);
-    let mut range_lines: Vec<String> = Vec::new();
-    let mut ingredient_id_num: Vec<u32> = Vec::new();
+    let mut range_lines: Vec<(u64, u64)> = Vec::new();
+    let mut ingredient_id_num: Vec<u64> = Vec::new();
     let mut ingredient_parse: bool = false;
-    for line in reader.lines()
-    {
+    for line in reader.lines() {
         let line_value: String = line?;
-        if line_value == "\n" {
+        debug!("Parsing line {:?}", line_value);
+        if line_value.is_empty() {
             ingredient_parse = true;
             continue;
         }
-        if !ingredient_parse {
-            range_lines.push(line_value);
+        if ingredient_parse {
+            ingredient_id_num.push(line_value.trim().parse::<u64>()?);
         }
         else {
-             ingredient_id_num.push(line_value.trim().parse::<u32>()?)
+            let tmp_vec_string: Vec<String> = line_value.split('-').map(|s| s.trim().to_string()).collect();
+            let range_start = tmp_vec_string[0].parse::<u64>().context("Failed to parse {tmp_vec_string[0]}")?;
+            let range_end = tmp_vec_string[1].parse::<u64>().context("Failed to parse {tmp_vec_string[1]}")?;
+            range_lines.push((range_start, range_end));
         }
-        
     }
     Ok((range_lines, ingredient_id_num))
 }
 
-fn part_one(lines: &Vec<String>) -> Result<i32>
+fn part_one(range_ids: &[(u64, u64)], food_ids: &[u64]) -> u32
 {
-    Ok(0)
+    let mut number_of_acceptable_foods: u32 = 0;
+    for &id in food_ids {
+        for range in range_ids {
+            if id >= range.0 && id <= range.1 {
+                // food id is in an acceptable range
+                debug!("Food id {id} is acceptable");
+                number_of_acceptable_foods += 1;
+                break
+            }
+        }
+    }
+    number_of_acceptable_foods
 }
 
-fn part_two(lines: &Vec<String>) -> Result<i32>
-{
-    Ok(0)
+fn part_two(range_ids: &mut Vec<(u64, u64)>) -> u64 {
+    range_ids.sort_by_key(|(a, _)| *a);
+    debug!("Sorted acceptable ids {range_ids:?}");
+    0
 }
 
 fn main() -> Result<()>
@@ -54,11 +65,13 @@ fn main() -> Result<()>
     env_logger::init();
     info!("Starting program");
     let args = Args::parse();
-    let lines = read_lines(&args.path)?;
-    debug!("lines\n\n{:?}", lines);
-    let part_one_answer = part_one(&lines)?;
+    let (ranges, food_ids) = read_lines(&args.path)?;
+    debug!("Ragnes\n\n{:?}", ranges);
+    debug!("Food Id's: {:?}", food_ids);
+    let part_one_answer = part_one(&ranges, &food_ids);
     println!("Answer to part one: {part_one_answer}");
-    let part_two_answer = part_two(&lines)?;
+    let mut ranges_copy = ranges.clone();
+    let part_two_answer = part_two(&mut ranges_copy);
     println!("Answer to part two: {part_two_answer}");
     Ok(())
 }
