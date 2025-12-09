@@ -1,4 +1,4 @@
-use std::{fs, path::{Path, PathBuf}};
+use std::{fs::File, path::{Path, PathBuf}};
 
 use anyhow::{Result};
 use clap::Parser;
@@ -11,9 +11,8 @@ struct Args{
     path: PathBuf,
 }
 
-fn read_lines(filename: &Path) -> Result<Vec<Vec<char>>>
-{
-    let file = fs::read_to_string(filename)?;
+fn read_lines(filename: &Path) -> Result<Vec<Vec<char>>> {
+    let file = File::open(filename)?;
     let grid: Vec<Vec<char>> = file.lines().map(|line| line.chars().collect()).collect();
     Ok(grid)
 }

@@ -1,3 +1,4 @@
+use core::num;
 use std::{path::{Path, PathBuf}};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
@@ -56,12 +57,25 @@ fn extra_data_parse(filename: &Path) -> Result<Vec<Vec<char>>> {
     for line in reader.lines() {
         let line = line?;
         let char_line: Vec<char> = line.chars().collect();
-        if (char_line.len() + 1) % 4 != 0 {
-            return Err(anyhow!("parsed char line is missing something {char_line:?}"));
-        }
         grid.push(char_line);
     }
     Ok(grid)
+}
+
+fn build_column(char_lines: &Vec<Vec<char>>, i: usize) -> Vec<char> {
+    let number_of_lines: usize = char_lines.len();
+    let mut column: Vec<char> = Vec::new();
+    for n in 0..number_of_lines {
+        column.push(char_lines[n][i]);
+    }
+    column
+}
+
+fn get_number(column: Vec<char>) -> Result<u64> {
+    /* Take a column of chars and returns a number */
+    let s: String = column.iter().collect();
+    let num: u64 = s.trim().parse::<u64>()?;
+    Ok(num)
 }
 
 fn part_one(lines: &Vec<Vec<String>>) -> Result<u64> {
@@ -93,11 +107,27 @@ fn part_one(lines: &Vec<Vec<String>>) -> Result<u64> {
 
 fn part_two(char_lines: &Vec<Vec<char>>) -> Result<u64> {
     debug!("Simple charred parse {char_lines:?}");
-    let base_vec_len: usize = char_lines[0].len();
-    let number_of_operators: usize = char_lines.len();
+    let chars_in_line: usize = char_lines[0].len();
+    let number_of_lines: usize = char_lines.len();
     let mut answer: u64 = 0;
-    for i in 0..base_vec_len {
-        let mut operator_vector: Vec<String> = Vec::new();
+    let mut numbers: Vec<u64> = Vec::new();
+    for i in (0..chars_in_line).rev() {
+        let column = build_column(char_lines, i);
+        debug!("Looking at column: {column:?}");
+        // Check for new sections. We'll know it's a new section if the whole column is empty space.
+        if column.iter().all(|c| c.is_whitespace()) {
+            debug!("New math operation");
+            continue;
+        }
+        else if column.iter().any(|&c| c == '*') {
+            debug!("Multiplication")
+        }
+        else if column.iter().any(|&c| c == '+') {
+            debug!("Addtion")
+        }
+        else {
+            numbers.push(get_number(column)?);
+        }
     }
     Ok(0)
 }
