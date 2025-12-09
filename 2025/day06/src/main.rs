@@ -1,11 +1,10 @@
-use core::num;
 use std::{path::{Path, PathBuf}};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
 use anyhow::{Context, Result, anyhow};
 use clap::Parser;
-use log::{debug, info, warn};
+use log::{debug, info};
 
 #[derive(Parser)]
 struct Args{
@@ -78,6 +77,23 @@ fn get_number(column: Vec<char>) -> Result<u64> {
     Ok(num)
 }
 
+fn multiply_numbers(numbers: &[u64]) -> u64 {
+    debug!("Multiplying numbers {numbers:?}");
+    let mut answer = 1;
+    for i in numbers {
+        answer *= i
+    }
+    answer
+}
+fn add_numbers(numbers: &[u64]) -> u64 {
+    debug!("Adding numbers {numbers:?}");
+    let mut answer = 0;
+    for i in numbers {
+        answer += i;
+    }
+    answer
+}
+
 fn part_one(lines: &Vec<Vec<String>>) -> Result<u64> {
     let base_vec_len: usize = lines[0].len();
     let number_of_operators: usize = lines.len();
@@ -108,28 +124,34 @@ fn part_one(lines: &Vec<Vec<String>>) -> Result<u64> {
 fn part_two(char_lines: &Vec<Vec<char>>) -> Result<u64> {
     debug!("Simple charred parse {char_lines:?}");
     let chars_in_line: usize = char_lines[0].len();
-    let number_of_lines: usize = char_lines.len();
     let mut answer: u64 = 0;
     let mut numbers: Vec<u64> = Vec::new();
     for i in (0..chars_in_line).rev() {
-        let column = build_column(char_lines, i);
+        let mut column = build_column(char_lines, i);
         debug!("Looking at column: {column:?}");
         // Check for new sections. We'll know it's a new section if the whole column is empty space.
         if column.iter().all(|c| c.is_whitespace()) {
             debug!("New math operation");
+            numbers.clear();
             continue;
         }
         else if column.iter().any(|&c| c == '*') {
+            column.pop();
+            numbers.push(get_number(column)?);
+            answer += multiply_numbers(&numbers);
             debug!("Multiplication")
         }
         else if column.iter().any(|&c| c == '+') {
+            column.pop();
+            numbers.push(get_number(column)?);
+            answer += add_numbers(&numbers);
             debug!("Addtion")
         }
         else {
             numbers.push(get_number(column)?);
         }
     }
-    Ok(0)
+    Ok(answer)
 }
 
 fn main() -> Result<()> {
