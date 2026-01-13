@@ -41,7 +41,7 @@ struct Distance<'a>{
 
 #[derive(Debug)]
 struct Circuit {
-    junction_boxs: Vec<JunctionBox>
+    junction_box_ids: Vec<u32>
 }
 
 fn read_lines(filename: &Path) -> Result<Vec<Vec<f32>>> {
@@ -61,9 +61,15 @@ fn read_lines(filename: &Path) -> Result<Vec<Vec<f32>>> {
     Ok(lines)
 }
 
-fn check_circuits(distances: &[Distance], circuits: &[Circuit]) -> bool {
-    // Check if the junction boxes in the distacne object passed in are in an exiting circuit or not.
-    
+fn check_circuits(distance: &Distance, circuits: &[Circuit]) -> bool {
+    // Check if the junction boxes in the distacne object passed in are in an existing circuit or not.
+    let jb1_id = &distance.box_one.index;
+    let jb2_id = &distance.box_two.index;
+    for circuit in circuits {
+        if circuit.junction_box_ids.contains(jb1_id) {
+
+        } 
+    }
     false
 }
 
