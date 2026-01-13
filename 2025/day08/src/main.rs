@@ -80,6 +80,9 @@ fn check_circuits(distance: &Distance, circuits: &mut Vec<Circuit>) {
                     let mut circuit_two = circuits[c2].junction_box_ids.clone();
 
                     circuits[circuit_index].junction_box_ids.append(&mut circuit_two);
+                    // Remove duplicates, dedup needs to be sorted first.
+                    circuits[circuit_index].junction_box_ids.sort();
+                    circuits[circuit_index].junction_box_ids.dedup();
                     circuits.remove(c2);
                     return
                 }
@@ -87,6 +90,8 @@ fn check_circuits(distance: &Distance, circuits: &mut Vec<Circuit>) {
             /*The if check above didn't find any matches for the second junction box. So we can just add it to this 
             existing circuit */
             circuits[circuit_index].junction_box_ids.push(jb2_id);
+            circuits[circuit_index].junction_box_ids.sort();
+            circuits[circuit_index].junction_box_ids.dedup();
             return
         } 
         else if circuits[circuit_index].junction_box_ids.contains(&jb2_id) {
@@ -101,6 +106,9 @@ fn check_circuits(distance: &Distance, circuits: &mut Vec<Circuit>) {
                     let mut circuit_two = circuits[c2].junction_box_ids.clone();
 
                     circuits[circuit_index].junction_box_ids.append(&mut circuit_two);
+                    // Remove duplicates, dedup needs to be sorted first.
+                    circuits[circuit_index].junction_box_ids.sort();
+                    circuits[circuit_index].junction_box_ids.dedup();
                     circuits.remove(c2);
                     return
                 }
@@ -108,11 +116,14 @@ fn check_circuits(distance: &Distance, circuits: &mut Vec<Circuit>) {
             /*The if check above didn't find any matches for the second junction box. So we can just add it to this 
             existing circuit */
             circuits[circuit_index].junction_box_ids.push(jb1_id);
+            circuits[circuit_index].junction_box_ids.sort();
+            circuits[circuit_index].junction_box_ids.dedup();
             return
         }
 
     }
-    
+    let new_circuit: Circuit = Circuit { junction_box_ids: vec![jb1_id, jb2_id] };
+    circuits.push(new_circuit);
 }
 
 fn part_one(lines: &[Vec<f32>]) -> Result<f32> {
@@ -146,6 +157,7 @@ fn part_one(lines: &[Vec<f32>]) -> Result<f32> {
     let mut circuits: Vec<Circuit> = Vec::new();
     for d in 0..10 {
         let distance = &distances[d];
+        println!("Testing out distance {distance:?}");
         check_circuits(distance, &mut circuits);
     }
     println!("\n****These are the circuits****");
