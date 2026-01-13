@@ -61,27 +61,58 @@ fn read_lines(filename: &Path) -> Result<Vec<Vec<f32>>> {
     Ok(lines)
 }
 
-fn check_circuits(distance: &Distance, circuits: &[Circuit]) -> bool {
+fn check_circuits(distance: &Distance, circuits: &mut Vec<Circuit>) {
     // Check if the junction boxes in the distacne object passed in are in an existing circuit or not.
-    let jb1_id = &distance.box_one.index;
-    let jb2_id = &distance.box_two.index;
+    let jb1_id = distance.box_one.index;
+    let jb2_id = distance.box_two.index;
     for circuit_index in 0..circuits.len() {
-        if circuits[circuit_index].junction_box_ids.contains(jb1_id) {
+        if circuits[circuit_index].junction_box_ids.contains(&jb1_id) {
             /* Junction box 1 is in a circuit. Need to add the other junction box to this circuit. If that other 
             junction box is in a circuit, then the entire circuit needs to be connected. If the other junction box 
             isn't in any  other circuit, then just add it and move on. 
             
             I don't need to look back at other circuits just look at the rest of the circuits for the second box.*/
-            for c2 in 
+            for c2 in circuit_index+1..circuits.len() {
+                if circuits[c2].junction_box_ids.contains(&jb2_id) {
+                    // Then the other junction is part of an existing circuit, and I want to connect the two.
+                    /*Because of taking part of circuits and modifying another part, I can't do that all at once. I 
+                    need to setup a dumby variable and copy part of that data over, then add it to circuits, then remove the older part. */
+                    let mut circuit_two = circuits[c2].junction_box_ids.clone();
+
+                    circuits[circuit_index].junction_box_ids.append(&mut circuit_two);
+                    circuits.remove(c2);
+                    return
+                }
+            }
+            /*The if check above didn't find any matches for the second junction box. So we can just add it to this 
+            existing circuit */
+            circuits[circuit_index].junction_box_ids.push(jb2_id);
+            return
         } 
-        else if circuits[circuit_index].junction_box_ids.contains(jb2_id) {
+        else if circuits[circuit_index].junction_box_ids.contains(&jb2_id) {
             /* Junction box 2 is in a circuit. Need to add the other junction box to this circuit. If that other 
             junction box is in a circuit, then the entire circuit needs to be connected. If the other junction box 
             isn't in any  other circuit, then just add it and move on. */
+            for c2 in circuit_index+1..circuits.len() {
+                if circuits[c2].junction_box_ids.contains(&jb1_id) {
+                    // Then the other junction is part of an existing circuit, and I want to connect the two.
+                    /*Because of taking part of circuits and modifying another part, I can't do that all at once. I 
+                    need to setup a dumby variable and copy part of that data over, then add it to circuits, then remove the older part. */
+                    let mut circuit_two = circuits[c2].junction_box_ids.clone();
+
+                    circuits[circuit_index].junction_box_ids.append(&mut circuit_two);
+                    circuits.remove(c2);
+                    return
+                }
+            }
+            /*The if check above didn't find any matches for the second junction box. So we can just add it to this 
+            existing circuit */
+            circuits[circuit_index].junction_box_ids.push(jb1_id);
+            return
         }
 
     }
-    false
+    
 }
 
 fn part_one(lines: &[Vec<f32>]) -> Result<f32> {
@@ -115,8 +146,10 @@ fn part_one(lines: &[Vec<f32>]) -> Result<f32> {
     let mut circuits: Vec<Circuit> = Vec::new();
     for d in 0..10 {
         let distance = &distances[d];
-        if check_circuits
+        check_circuits(distance, &mut circuits);
     }
+    println!("\n****These are the circuits****");
+    println!("{circuits:?}");
     Ok(0.0)
 }
 
