@@ -65,10 +65,21 @@ fn check_circuits(distance: &Distance, circuits: &[Circuit]) -> bool {
     // Check if the junction boxes in the distacne object passed in are in an existing circuit or not.
     let jb1_id = &distance.box_one.index;
     let jb2_id = &distance.box_two.index;
-    for circuit in circuits {
-        if circuit.junction_box_ids.contains(jb1_id) {
-
+    for circuit_index in 0..circuits.len() {
+        if circuits[circuit_index].junction_box_ids.contains(jb1_id) {
+            /* Junction box 1 is in a circuit. Need to add the other junction box to this circuit. If that other 
+            junction box is in a circuit, then the entire circuit needs to be connected. If the other junction box 
+            isn't in any  other circuit, then just add it and move on. 
+            
+            I don't need to look back at other circuits just look at the rest of the circuits for the second box.*/
+            for c2 in 
         } 
+        else if circuits[circuit_index].junction_box_ids.contains(jb2_id) {
+            /* Junction box 2 is in a circuit. Need to add the other junction box to this circuit. If that other 
+            junction box is in a circuit, then the entire circuit needs to be connected. If the other junction box 
+            isn't in any  other circuit, then just add it and move on. */
+        }
+
     }
     false
 }
@@ -88,10 +99,10 @@ fn part_one(lines: &[Vec<f32>]) -> Result<f32> {
     // elements. And then just add elements into that list.
     let jb_len = junction_boxes.len();
     println!("{jb_len}");
-    let numbers_of_distances = junction_boxes.len()*(junction_boxes.len() - 1) / 2; // Elements in nxn matrix above diagonal.
+    let numbers_of_distances = jb_len*(jb_len - 1) / 2; // Elements in nxn matrix above diagonal.
     let mut distances: Vec<Distance> = Vec::with_capacity(numbers_of_distances);
-    for jb_one_index in 0..junction_boxes.len() {
-        for jb_two_index in (jb_one_index+1)..junction_boxes.len() {
+    for jb_one_index in 0..jb_len {
+        for jb_two_index in (jb_one_index+1)..jb_len {
             let dist = junction_boxes[jb_one_index].distance(&junction_boxes[jb_two_index]);
             let distance = Distance {distance: dist, box_one: &junction_boxes[jb_one_index], box_two: &junction_boxes[jb_two_index]};
             distances.push(distance);
