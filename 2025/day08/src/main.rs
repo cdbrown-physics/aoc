@@ -126,8 +126,8 @@ fn check_circuits(distance: &Distance, circuits: &mut Vec<Circuit>) {
     circuits.push(new_circuit);
 }
 
-fn part_one(lines: &[Vec<f32>]) -> Result<f32> {
-    println!("{lines:?}");
+fn part_one(lines: &[Vec<f32>]) -> Result<usize> {
+    debug!("{lines:?}");
     let mut junction_boxes: Vec<JunctionBox> = Vec::new();
     let mut index: u32 = 0;
     for line in lines {
@@ -135,12 +135,12 @@ fn part_one(lines: &[Vec<f32>]) -> Result<f32> {
         junction_boxes.push(jb);
         index += 1;
     }
-    println!("{junction_boxes:?}");
+    debug!("{junction_boxes:?}");
     // Now with all of the JunctionBox structs, need to find the distance between all members. And make a vector of 
     // those distances I already know how many distances I'll need, so I can make the distances vector with that many
     // elements. And then just add elements into that list.
     let jb_len = junction_boxes.len();
-    println!("{jb_len}");
+    debug!("{jb_len}");
     let numbers_of_distances = jb_len*(jb_len - 1) / 2; // Elements in nxn matrix above diagonal.
     let mut distances: Vec<Distance> = Vec::with_capacity(numbers_of_distances);
     for jb_one_index in 0..jb_len {
@@ -155,14 +155,18 @@ fn part_one(lines: &[Vec<f32>]) -> Result<f32> {
     distances.sort_by(|a,b| a.distance.total_cmp(&b.distance));
     debug!("*****\n\nDistances post sort: {distances:?}");
     let mut circuits: Vec<Circuit> = Vec::new();
-    for d in 0..10 {
+    for d in 0..1000 {
         let distance = &distances[d];
-        println!("Testing out distance {distance:?}");
+        debug!("Testing out distance {distance:?}");
         check_circuits(distance, &mut circuits);
     }
-    println!("\n****These are the circuits****");
-    println!("{circuits:?}");
-    Ok(0.0)
+    debug!("\n****These are the circuits****");
+    debug!("{circuits:?}");
+    // Now I need to get the top 3
+    circuits.sort_by(|a, b| b.junction_box_ids.len().cmp(&a.junction_box_ids.len()));
+    debug!("Sorted {circuits:?}");
+    let answer = circuits[0].junction_box_ids.len() * circuits[1].junction_box_ids.len() * circuits[2].junction_box_ids.len();
+    Ok(answer)
 }
 
 fn part_two(lines: &[Vec<f32>]) -> Result<f32> {
