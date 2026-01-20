@@ -1,3 +1,4 @@
+use core::num;
 use std::{path::{Path, PathBuf}};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
@@ -169,8 +170,47 @@ fn part_one(lines: &[Vec<f32>]) -> Result<usize> {
     Ok(answer)
 }
 
-fn part_two(lines: &[Vec<f32>]) -> Result<f32> {
-    Ok(0.0)
+fn part_two(lines: &[Vec<f32>]) -> Result<usize> {
+    debug!("{lines:?}");
+    let mut junction_boxes: Vec<JunctionBox> = Vec::new();
+    let mut index: u32 = 0;
+    for line in lines {
+        let jb = JunctionBox {x: line[0], y: line[1], z: line[2], index};
+        junction_boxes.push(jb);
+        index += 1;
+    }
+    debug!("{junction_boxes:?}");
+    // Now with all of the JunctionBox structs, need to find the distance between all members. And make a vector of 
+    // those distances I already know how many distances I'll need, so I can make the distances vector with that many
+    // elements. And then just add elements into that list.
+    let jb_len = junction_boxes.len();
+    debug!("{jb_len}");
+    let numbers_of_distances = jb_len*(jb_len - 1) / 2; // Elements in nxn matrix above diagonal.
+    let mut distances: Vec<Distance> = Vec::with_capacity(numbers_of_distances);
+    for jb_one_index in 0..jb_len {
+        for jb_two_index in (jb_one_index+1)..jb_len {
+            let dist = junction_boxes[jb_one_index].distance(&junction_boxes[jb_two_index]);
+            let distance = Distance {distance: dist, box_one: &junction_boxes[jb_one_index], box_two: &junction_boxes[jb_two_index]};
+            distances.push(distance);
+        }
+    }
+    debug!("***\n\nDistances pre sort: {distances:?}");
+    // Now I want to sort distances based on the distance element. 
+    distances.sort_by(|a,b| a.distance.total_cmp(&b.distance));
+    debug!("*****\n\nDistances post sort: {distances:?}");
+    let mut circuits: Vec<Circuit> = Vec::new();
+    let mut answer: usize = 0;
+    for d in 0..numbers_of_distances-1 {
+        let distance = &distances[d];
+        debug!("Testing out distance {distance:?}");
+        check_circuits(distance, &mut circuits);
+        if circuits[0].junction_box_ids.len() == jb_len {
+            debug!("Last connection happens with {distance:?}");
+            answer = distance.box_one.x as usize * distance.box_two.x as usize;
+            break
+        }
+    }
+    Ok(answer)
 }
 
 fn main() -> Result<()> {
