@@ -23,7 +23,41 @@ impl RedTile {
         let area: u64 = dx as u64 * dy as u64;
         area
     }
-    
+    fn green_line(&self, other: &RedTile) -> Vec<GreenTile> {
+        let mut green_tiles: Vec<GreenTile> = Vec::new();
+        if self.x.abs_diff(other.x) == 0 {
+            // Then we have a horizontal line. Add Green tiles with self.x and all the difference y values
+            // I need to get the largest of the two y values.
+            if other.y > self.y {
+                for green_y in (self.y+1)..other.y {
+                    let green_tile = GreenTile{x: self.x, y: green_y};
+                    green_tiles.push(green_tile);
+                }
+            }
+            else {
+                for green_y in (other.y + 1)..self.y {
+                    let green_tile = GreenTile{x: self.x, y: green_y};
+                    green_tiles.push(green_tile);
+                }
+            }
+        }
+        else if self.y.abs_diff(other.y) == 0 {
+            /*Then we have a vertical line. Add Green tiles with self.y and all the different x values */
+            if other.x > self.x {
+                for green_x in (self.x+1)..other.x {
+                    let green_tile = GreenTile{x: green_x, y: self.y};
+                    green_tiles.push(green_tile);
+                }
+            }
+            else {
+                for green_x in (other.x + 1)..self.x {
+                    let green_tile = GreenTile{x: green_x, y: self.y};
+                    green_tiles.push(green_tile);
+                }
+            }
+        }
+        green_tiles
+    }
 }
 
 #[derive(Debug)]
@@ -54,6 +88,11 @@ fn read_lines(filename: &Path) -> Result<Vec<RedTile>> {
 
 fn find_green_tiles(red_tiles: &[RedTile]) -> Result<Vec<GreenTile>> {
     let mut green_tiles: Vec<GreenTile> = Vec::new();
+    // Start by adding all the tiles in a line. Go through the list of tiles and
+    let last_tile = red_tiles[0]; // For starting we can just grab the first element in the red tile list
+    for red_tile in red_tiles[1..] {
+        let new_green_tiles: Vec<GreenTile> = last_tile.green_line(red_tile);
+    }
 }
 
 fn part_one(red_tiles: &[RedTile]) -> Result<u64> {
